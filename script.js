@@ -4,12 +4,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const taskInput = document.getElementById('task-input'); // حقل إدخال المهمة
     const taskList = document.getElementById('task-list'); // قائمة المهام
 
-    // دالة لإضافة مهمة جديدة
-    function addTask() {
-        const taskText = taskInput.value.trim(); // قراءة النص المدخل وإزالة الفراغات الزائدة
+    // تحميل المهام من Local Storage عند تشغيل الصفحة
+    function loadTasks() {
+        const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]'); // استرجاع المهام أو مصفوفة فارغة
+        storedTasks.forEach(taskText => addTask(taskText, false)); // إضافة المهام إلى القائمة
+    }
 
-        if (taskText === '') {
-            alert('Please enter a task!'); // تنبيه المستخدم إذا كان الحقل فارغًا
+    // دالة لإضافة مهمة جديدة
+    function addTask(taskText, save = true) {
+        if (!taskText.trim()) {
+            alert('Please enter a task!'); // منع إضافة مهام فارغة
             return;
         }
 
@@ -22,24 +26,49 @@ document.addEventListener('DOMContentLoaded', function () {
         removeButton.textContent = 'Remove';
         removeButton.classList.add('remove-btn');
 
-        // عند الضغط على زر الإزالة، يتم حذف العنصر من القائمة
+        // عند الضغط على زر الإزالة، يتم حذف العنصر من القائمة ومن Local Storage
         removeButton.onclick = function () {
-            taskList.removeChild(listItem);
+            listItem.remove();
+            removeTask(taskText);
         };
 
         listItem.appendChild(removeButton); // إضافة زر الحذف داخل عنصر القائمة
         taskList.appendChild(listItem); // إضافة العنصر إلى القائمة
 
-        taskInput.value = ''; // مسح حقل الإدخال بعد الإضافة
+        // حفظ المهمة في Local Storage إذا لم تكن من عملية استرجاع
+        if (save) {
+            saveTask(taskText);
+        }
+    }
+
+    // دالة لحفظ المهام في Local Storage
+    function saveTask(taskText) {
+        const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        storedTasks.push(taskText);
+        localStorage.setItem('tasks', JSON.stringify(storedTasks));
+    }
+
+    // دالة لحذف مهمة من Local Storage
+    function removeTask(taskText) {
+        let storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        storedTasks = storedTasks.filter(task => task !== taskText); // إزالة المهمة
+        localStorage.setItem('tasks', JSON.stringify(storedTasks)); // تحديث Local Storage
     }
 
     // تنفيذ إضافة المهمة عند الضغط على زر "إضافة"
-    addButton.addEventListener('click', addTask);
+    addButton.addEventListener('click', function () {
+        addTask(taskInput.value);
+        taskInput.value = ''; // مسح حقل الإدخال بعد الإضافة
+    });
 
     // تنفيذ إضافة المهمة عند الضغط على مفتاح "Enter"
     taskInput.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
-            addTask();
+            addTask(taskInput.value);
+            taskInput.value = ''; // مسح حقل الإدخال بعد الإضافة
         }
     });
+
+    // تحميل المهام المحفوظة عند فتح الصفحة
+    loadTasks();
 });
