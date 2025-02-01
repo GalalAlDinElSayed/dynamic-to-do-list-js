@@ -11,9 +11,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // دالة لإضافة مهمة جديدة
-    function addTask(taskText, save = true) {
-        if (!taskText.trim()) {
-            alert('Please enter a task!'); // منع إضافة مهام فارغة
+    function addTask(taskText = null, save = true) {
+        // الحصول على النص من حقل الإدخال إذا لم يتم تمريره كمعامل
+        if (!taskText) {
+            taskText = taskInput.value.trim(); // إزالة المسافات الفارغة من البداية والنهاية
+        }
+
+        // التحقق من أن المهمة ليست فارغة
+        if (!taskText) {
+            alert('Please enter a task!'); // تنبيه المستخدم إذا لم يدخل أي شيء
             return;
         }
 
@@ -39,6 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (save) {
             saveTask(taskText);
         }
+
+        // مسح حقل الإدخال بعد إضافة المهمة
+        taskInput.value = '';
     }
 
     // دالة لحفظ المهام في Local Storage
@@ -57,15 +66,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // تنفيذ إضافة المهمة عند الضغط على زر "إضافة"
     addButton.addEventListener('click', function () {
-        addTask(taskInput.value);
-        taskInput.value = ''; // مسح حقل الإدخال بعد الإضافة
+        addTask();
     });
 
     // تنفيذ إضافة المهمة عند الضغط على مفتاح "Enter"
     taskInput.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
-            addTask(taskInput.value);
-            taskInput.value = ''; // مسح حقل الإدخال بعد الإضافة
+            addTask();
         }
     });
 
